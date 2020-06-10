@@ -26,3 +26,13 @@ function addRandomThingsOnMyMind() {
   const greetingContainer = document.getElementById('my-mind-container');
   greetingContainer.innerText = greeting;
 }
+
+function addRandomThingsFromServer() {
+  fetch("/data")
+    .then( response => response.text() )
+    .then( message => {
+        // Add it to the page.
+        const greetingContainer = document.getElementById('my-mind-container');
+        greetingContainer.innerText = message;
+    })
+}
