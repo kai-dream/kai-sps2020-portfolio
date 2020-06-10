@@ -12,27 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Adds a random greeting to the page.
- */
-function addRandomThingsOnMyMind() {
-  const greetings =
-      ['Work work', 'Workout', 'Food', 'Write document'];
-
-  // Pick a random greeting.
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-
-  // Add it to the page.
-  const greetingContainer = document.getElementById('my-mind-container');
-  greetingContainer.innerText = greeting;
-}
-
-function addRandomThingsFromServer() {
+function fetchComments() {
   fetch("/data")
-    .then( response => response.text() )
-    .then( message => {
+    .then( response => response.json() )
+    .then( messages => {
         // Add it to the page.
-        const greetingContainer = document.getElementById('my-mind-container');
-        greetingContainer.innerText = message;
+        const greetingContainer = document.getElementById('comments-container');
+        greetingContainer.innerText = messages.toString();
     })
 }
