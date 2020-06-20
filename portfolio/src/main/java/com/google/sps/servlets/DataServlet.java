@@ -38,6 +38,9 @@ import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
@@ -48,6 +51,18 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String[] languagePreference = request.getParameterValues("lang");
+    String languageCode = null;
+    if (languagePreference != null) {
+        languageCode = languagePreference[0];
+        System.out.println(String.format("Receive GET on \"/data\" with language code = %s", languageCode));
+    } else {
+        System.out.println("Receive GET on \"/data\" with no language code");
+    }
+
+    // Prepare for  the translation.
+    Translate translate = TranslateOptions.getDefaultInstance().getService();   
+    
     Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -64,10 +79,17 @@ public class DataServlet extends HttpServlet {
       comment.imageUrl = getEntityPropertyWithDefault(entity, "imageUrl", "");
       comment.email = getEntityPropertyWithDefault(entity, "email", "");
 
+      if (languageCode != null) {
+        Translation translation = translate.translate(comment.message, Translate.TranslateOption.targetLanguage(languageCode));
+        String translatedText = translation.getTranslatedText();
+        comment.message = translatedText;
+      }
+
       commentList.add(comment);
     }
 
-    response.setContentType("application/json;");
+    response.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=UTF-8");
     response.getWriter().println(JsonUtility.ToJson(commentList));
   }
 

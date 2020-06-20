@@ -12,13 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function fetchComments() {
-  fetch("/data")
+function fetchComments(languageCode) {
+
+  var targetUrl = "/data"
+  var languageCodeQueryString = "";
+
+  if (languageCode != undefined) {
+    languageCodeQueryString = "?lang=" + languageCode;
+    targetUrl = targetUrl + languageCodeQueryString;
+  } 
+
+  fetch(targetUrl)
     .then( response => response.json() )
     .then( messages => {
         // Add it to the page.
-        const commentsContainerDiv = document.getElementById('comments-container');
-        commentsContainerDiv.innerHtml = '';
+        var commentsContainerDiv = document.getElementById('comments-container');
+        commentsContainerDiv.innerHTML = "";
 
         console.log(messages);
 
@@ -117,7 +126,7 @@ function fetchLoginStatus() {
 
             // Show Logout link
             const loginLogoutContainer = document.getElementById('login-logout-container');
-            loginLogoutContainer.innerHtml = "";
+            loginLogoutContainer.innerHTML = "";
             
             //Logout <p>Logout <a href=\"" + logoutUrl + "\">here</a>.</p>");
             var logOutLink = document.createElement('a');
@@ -133,7 +142,7 @@ function fetchLoginStatus() {
 
             // Show Login link
             const loginLogoutContainer = document.getElementById('login-logout-container');
-            loginLogoutContainer.innerHtml = "";
+            loginLogoutContainer.innerHTML = "";
             
             //Login <a href=\"" + loginUrl + "\">here</a>.</p>");
             var logInLink = document.createElement('a');
@@ -144,4 +153,10 @@ function fetchLoginStatus() {
             loginLogoutContainer.style.display = "block";
         }
     })
+}
+
+function selectNewLanguage() {
+    const languageCode = document.getElementById('language').value;
+
+    fetchComments(languageCode);
 }
