@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.google.gson.Gson;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -37,6 +36,8 @@ import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
@@ -61,14 +62,13 @@ public class DataServlet extends HttpServlet {
       comment.message = getEntityPropertyWithDefault(entity, "content", "");
       comment.timestamp = getEntityPropertyWithDefault(entity, "timestamp", (long)0);
       comment.imageUrl = getEntityPropertyWithDefault(entity, "imageUrl", "");
+      comment.email = getEntityPropertyWithDefault(entity, "email", "");
 
       commentList.add(comment);
     }
 
-    Gson gson = new Gson();
-    String commentListJson = gson.toJson(commentList);
     response.setContentType("application/json;");
-    response.getWriter().println(commentListJson);
+    response.getWriter().println(JsonUtility.ToJson(commentList));
   }
 
   static <T> T getEntityPropertyWithDefault (Entity entity, String name, T defaultValue) {
@@ -81,6 +81,15 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()){
+        response.sendRedirect("/index.html");
+        return;
+    }
+
+    String userEmail = userService.getCurrentUser().getEmail();
+
     String commentString = request.getParameter("comment");
 
     Entity commentEntity = new Entity("Comment");
@@ -92,6 +101,9 @@ public class DataServlet extends HttpServlet {
     // Get the URL of the image that the user uploaded to Blobstore.
     String imageUrl = getUploadedFileUrl(request, "image");
     commentEntity.setProperty("imageUrl", imageUrl);
+
+    // Email
+    commentEntity.setProperty("email", userEmail);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     datastore.put(commentEntity);

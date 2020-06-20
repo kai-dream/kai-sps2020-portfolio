@@ -20,10 +20,10 @@
       <p>Click here to get a random message:</p>
       <button onclick="fetchComments()">Refresh comments</button>
       <button onclick="fetchUploadUrl()">Show Add Comment Div</button>
+      <button onclick="fetchLoginStatus()">Check Login Status</button>
       <p>
           <image src="/images/erha-1.jpg" />
       </p>
-      <div id="comments-container" > </div>
       <div id="add-comments-container" style="display: none;">
           <form action="/data" method="POST" id="post_comment_form" enctype="multipart/form-data" class="hidden" >
             <p>Add your comment:</p>
@@ -33,6 +33,8 @@
             <br/><br/>
             <input type="submit" />
           </form>
-    </div>
+      </div>
+      <p id="login-logout-container" style="display: none;"></p>
+      <div id="comments-container" > </div>
   </body>
 </html>

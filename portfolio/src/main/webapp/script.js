@@ -35,16 +35,24 @@ function fetchComments() {
         tableHeaderRowImage.innerText = "Image";
         var tableHeaderRowTimestamp = document.createElement("th");
         tableHeaderRowTimestamp.innerText = "Timestamp";
+        var tableHeaderRowEmail = document.createElement("th");
+        tableHeaderRowEmail.innerText = "Email";
 
         tableHeaderRow.appendChild(tableHeaderRowMessage);
         tableHeaderRow.appendChild(tableHeaderRowImage);
         tableHeaderRow.appendChild(tableHeaderRowTimestamp);
+        tableHeaderRow.appendChild(tableHeaderRowEmail);
 
         messages.forEach( comment => {
             var message = comment.message;
             var image = comment.imageUrl;
             var timestamp = comment.timestamp;
-            console.log("table row " + message + ": " + image + " " + timestamp);
+            var email = comment.email;
+
+            if (email == "") {
+                email = "anonymous user";
+            }
+            console.log("table row " + message + ": " + image + " " + timestamp + " " + email);
 
             var tableRow = document.createElement("tr");
             tableElement.appendChild(tableRow);
@@ -53,7 +61,7 @@ function fetchComments() {
             tableRowMessage.innerText = message;
 
             var tableRowImage = document.createElement("th");
-            if (image != "") {
+            if ((image != undefined) && (image != "")) {
                 var imgElement = document.createElement("img");
                 imgElement.src=image;
                 imgElement.alt = "This is image of comment";
@@ -63,10 +71,13 @@ function fetchComments() {
             var tableRowTimestamp = document.createElement("th");
             tableRowTimestamp.innerText = timestamp;
 
+            var tableRowEmail = document.createElement("th");
+            tableRowEmail.innerText = email;
+
             tableRow.appendChild(tableRowMessage);
             tableRow.appendChild(tableRowImage);
             tableRow.appendChild(tableRowTimestamp);
-
+            tableRow.appendChild(tableRowEmail);
         });
     });
 
@@ -80,7 +91,57 @@ function fetchUploadUrl() {
         const postForm = document.getElementById('post_comment_form');
         postForm.action = url;
 
+        fetchLoginStatus();
+    })
+}
+
+function setCommentBoxVisible(isVisible) {
+    if (isVisible) {
         const postCommentDiv = document.getElementById('add-comments-container');
         postCommentDiv.style.display = "block";
+    } else {
+        const postCommentDiv = document.getElementById('add-comments-container');
+        postCommentDiv.style.display = "none";
+    }
+}
+
+function fetchLoginStatus() {
+    fetch("/loginstatus")
+        .then( response => response.json() )
+    .then( loginStatusResult => {
+        console.log("Login Status: " + JSON.stringify(loginStatusResult));
+
+        // If logged in, show comment box
+        if (loginStatusResult.isLoggedIn) {
+            setCommentBoxVisible(true);
+
+            // Show Logout link
+            const loginLogoutContainer = document.getElementById('login-logout-container');
+            loginLogoutContainer.innerHtml = "";
+            
+            //Logout <p>Logout <a href=\"" + logoutUrl + "\">here</a>.</p>");
+            var logOutLink = document.createElement('a');
+            logOutLink.href = loginStatusResult.logOutUrl;
+            logOutLink.innerText = "LogOut " + loginStatusResult.account.email;
+
+            loginLogoutContainer.appendChild(logOutLink);
+            loginLogoutContainer.style.display = "block";
+        }
+        // Otherwise, show Login box.
+        else {
+            setCommentBoxVisible(false);
+
+            // Show Login link
+            const loginLogoutContainer = document.getElementById('login-logout-container');
+            loginLogoutContainer.innerHtml = "";
+            
+            //Login <a href=\"" + loginUrl + "\">here</a>.</p>");
+            var logInLink = document.createElement('a');
+            logInLink.href = loginStatusResult.logInUrl;
+            logInLink.innerText = "LogIn";
+
+            loginLogoutContainer.appendChild(logInLink);
+            loginLogoutContainer.style.display = "block";
+        }
     })
 }
