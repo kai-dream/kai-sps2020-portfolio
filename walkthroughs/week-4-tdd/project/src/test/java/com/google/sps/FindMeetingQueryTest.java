@@ -270,4 +270,29 @@ public final class FindMeetingQueryTest {
 
     Assert.assertEquals(expected, actual);
   }
+
+    @Test
+    public void overlappingTime() {
+        // Have an event for each person but one ends earlier. We should only see one option.
+        //
+        // Events  : |----A---|
+        //           |--B--|         |--B--|
+        // Day     : |---------------------|
+        // Options :          |---1--|
+
+        Collection<Event> events = Arrays.asList(
+            new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_1000AM, false),
+                Arrays.asList(PERSON_A)),
+            new Event("Event 2", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0800AM, false),
+                Arrays.asList(PERSON_B)),
+            new Event("Event 3", TimeRange.fromStartEnd(TIME_1100AM, TimeRange.END_OF_DAY, true),
+                Arrays.asList(PERSON_B)));
+
+        MeetingRequest request =  new MeetingRequest(Arrays.asList(PERSON_A, PERSON_B), DURATION_30_MINUTES);
+
+        Collection<TimeRange> actual = query.query(events, request);
+        Collection<TimeRange> expected = Arrays.asList(TimeRange.fromStartEnd(TIME_1000AM, TIME_1100AM, false));
+
+        Assert.assertEquals(expected, actual);
+    }
 }
