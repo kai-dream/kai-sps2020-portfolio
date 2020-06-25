@@ -34,6 +34,7 @@ public final class FindMeetingQuery {
     ArrayList<TimeRange> relevantTimerangeList = new ArrayList<>();
     relevantTimerangeList.ensureCapacity(events.size());
 
+    // Time complexity: O(1) * Event names
     for(Event e: events) {
         Set<String> eventAttendees = e.getAttendees();
         
@@ -63,6 +64,8 @@ public final class FindMeetingQuery {
     int previousEnd = (int)0; // Non-inclusive, as in TimeRange.end definition
     final int MIN_DURATION = (int)request.getDuration();
 
+    // Time complexity: O(N) where N is the number of relavent events
+
     for (TimeRange range: relevantTimerangeList) {
         // Check if current range overlaps with previosu event
         // Precondition from sorting is that range.start() >= previousStart
@@ -85,6 +88,7 @@ public final class FindMeetingQuery {
         result.add(TimeRange.fromStartEnd(previousEnd, TimeRange.END_OF_DAY + 1, false));
     }
 
+    // Overall Time complexity: O(P) + O(N) where N is the number of events, P is the total number of people in known events.
     return result;
   }
 
